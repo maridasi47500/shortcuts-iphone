@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Python Shortcuts Builder</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .action-block { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+    label { display: block; margin-top: 5px; }
+    input { width: 100%; padding: 5px; margin-bottom: 5px; }
+    button { margin-top: 10px; }
+    pre { background: #f4f4f4; padding: 10px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h2>Build a Python Shortcut</h2>
+  <div id="actionsContainer"></div>
+  <button onclick="addAction()">+ Add Action</button>
+  <button onclick="printForm()">print JSON</button>
+  <button onclick="submitForm()">Submit JSON</button>
+
+  <h3>Generated JSON:</h3>
+  <pre id="output"></pre>
+<form action="/myform" method="post">
+<input type="hidden" name="hey" id="myoutput"/></form>
+
+  <script>
+    let actionsList = [];
+
+    async function fetchActions() {
+      const res = await fetch("https://raw.githubusercontent.com/alexander-akhmetov/python-shortcuts/refs/heads/master/docs/actions.md");
+      const text = await res.text();
+      const blocks = text.split("### ").slice(1);
+      actionsList = blocks.map(block => {
+        const name = block.split("\n")[0].trim();
+        const keyword = (block.match(/\*\*keyword\*\*: `(.+?)`/) || [])[1];
+        const params = [...block.matchAll(/\* (\w+) \(\*required.*?\)/g)].map(m => m[1]);
+        return { name, keyword, params };
+      });
+    }
+
+    function addAction() {
+      const container = document.getElementById("actionsContainer");
+      const div = document.createElement("div");
+      div.className = "action-block";
+
+      const select = document.createElement("select");
+      select.innerHTML = actionsList.map(a => `<option value="${a.keyword}">${a.name}</option>`).join("");
+      select.onchange = () => updateParams(div, select.value);
+      div.appendChild(select);
+
+      const paramDiv = document.createElement("div");
+      paramDiv.className = "params";
+      div.appendChild(paramDiv);
+
+      container.appendChild(div);
+      updateParams(div, select.value);
+    }
+
+    function updateParams(div, keyword) {
+      const action = actionsList.find(a => a.keyword === keyword);
+      const paramDiv = div.querySelector(".params");
+      paramDiv.innerHTML = "";
+      action.params.forEach(param => {
+        const label = document.createElement("label");
+        label.textContent = param;
+        const input = document.createElement("input");
+        input.name = param;
+        paramDiv.appendChild(label);
+        paramDiv.appendChild(input);
+      });
+    }
+
+    function printForm() {
+      const blocks = document.querySelectorAll(".action-block");
+      const result = [];
+      blocks.forEach(block => {
+        const keyword = block.querySelector("select").value;
+        const inputs = block.querySelectorAll("input");
+        const data = {};
+        inputs.forEach(input => {
+          data[input.name] = input.value || "{{ask_when_run}}";
+        });
+        result.push({ action: keyword, data });
+      });
+      document.getElementById("output").textContent = JSON.stringify(result, null, 2);
+    }
+    function submitForm() {
+      const blocks = document.querySelectorAll(".action-block");
+      const result = [];
+      blocks.forEach(block => {
+        const keyword = block.querySelector("select").value;
+        const inputs = block.querySelectorAll("input");
+        const data = {};
+        inputs.forEach(input => {
+          data[input.name] = input.value || "{{ask_when_run}}";
+        });
+        result.push({ action: keyword, data });
+      });
+      document.getElementById("myoutput").value = JSON.stringify(result, null, 2);
+    }
+
+    fetchActions();
+  </script>
+</body>
+</html>
+

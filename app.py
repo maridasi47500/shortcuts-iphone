@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from shortcuts import Shortcut  # your custom Shortcut class
 from flask import Flask, render_template
 from flask import Flask, request, redirect, render_template
+import os
 from shortcuts import Shortcut
 import subprocess
 
@@ -42,6 +43,7 @@ def sign_shortcut():
 def toml_to_shortcut():
     toml_file = request.files.get('toml_path')
     output_name = request.form.get('output_path', 'output.shortcut')
+    print(toml_file, output_name)
 
     if not toml_file:
         return "No TOML file uploaded", 400
@@ -51,8 +53,11 @@ def toml_to_shortcut():
 
     output_path = os.path.join(app.config['UPLOAD_FOLDER'], output_name)
     sc = Shortcut()
-    sc.load_toml(toml_path)
-    sc.dump_shortcut(output_path)
+    #sc.load_toml(toml_path)
+    sc.dump(output_path)
+    hey="shortcuts examples/"+output_path+" "+output_path.replace(".toml",".shortcut")+""
+    subprocess.run(hey.split(" "))
+
 
     return f'''
         SHORTCUT file created.<br>
@@ -67,9 +72,16 @@ def toml_to_shortcut():
 </form>
     '''
 
+@app.route('/someform')
+def pythonform():
+    return render_template('form.html')
+@app.route('/myform', methods=["POST"])
+def heypythonform():
+    return render_template('form.html')
+
 @app.route('/')
 def welcome():
-    return render_template('index.html')
+    return render_template('index.html', maliste=os.listdir("uploads"))
 
 
 
@@ -125,5 +137,6 @@ def python_to_shortcut_or_toml():
     return jsonify({'message': f'{format_type} file created', 'path': output_path})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    #app.run(host="192.168.1.18", port="4000", debug=True)
+    app.run(port="4000", debug=True)
 

@@ -7,21 +7,27 @@
 <p>Use Siri Shortcuts &#9786; to automate your day!</p>
 <p>Trigger actions by location &#128205;, time &#9200;, or voice &#128483;.</p>
 <p>Customize routines &#9881; and integrate your favorite apps &#129504;.</p>
+<a href="/someform">python code</a>
 
   <h2>Convert TOML to Shortcut</h2>
-  <form action="http://localhost:5000/toml-to-shortcut" method="post">
+  <form enctype="multipart/form-data" action="/toml-to-shortcut" method="post">
     <label for="toml_path">TOML content:</label><br>
-    <input type="file" id="toml_path" name="toml_path"><br><br>
+    <input type="file" id="toml_path" name="toml_path"/><br><br>
 
     <label for="output_path">Output Shortcut name:</label><br>
     <input type="text" id="output_path" name="output_path" value="example_output.shortcut"><br><br>
 
-    <input type="submit" value="Convert">
+    <input type="submit" value="Convert"/>
   </form>
+<ul>
+{% for iname in maliste -%}
+<li><a href="/download/{{ iname }}">download {{iname}}</a></li>
+{% endfor %}
+</ul>
 <h2>Convert Shortcut to TOML</h2>
 <form action="/shortcut-to-toml" method="post" enctype="multipart/form-data">
     <label for="shortcut_path">Shortcut File:</label><br>
-    <input type="file" id="shortcut_path" name="shortcut_path"><br><br>
+    <input type="file" id="shortcut_path" name="shortcut_path"/><br><br>
 
     <label for="output_path">Output TOML Name:</label><br>
     <input type="text" id="output_path" name="output_path" value="example_output.toml"><br><br>
